@@ -16,12 +16,19 @@ export class SnackbarService {
     });
   }
 
-  public displaySuccess() {
-    this.show({
-      key: 'topRight',
-      severity: 'success',
-      closable: false
-    });
+  public displaySuccess(message?: string) {
+    if (!!message) {
+      this.show({
+        detail: message,
+        severity: 'success',
+      });
+    } else {
+      this.show({
+        key: 'topRight',
+        severity: 'success',
+        closable: false
+      });
+    }
   }
 
   public displayInfo(message: string) {

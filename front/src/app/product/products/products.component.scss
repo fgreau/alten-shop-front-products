@@ -1,0 +1,28 @@
+:host {
+  display: block;
+  width: 66%;
+  min-width: 700px;
+  margin: 0 auto;
+  user-select: none;
+}
+
+.list-product-section {
+  flex: 1 1 0;
+}
+
+.list-product-end {
+  flex: 0 0 auto;
+  margin-left: auto;
+  width: 100px;
+  justify-content: flex-end;
+}
+
+.list-product-end, .grid-product-bottom-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.grid-product-section {
+  text-align: center;
+}
