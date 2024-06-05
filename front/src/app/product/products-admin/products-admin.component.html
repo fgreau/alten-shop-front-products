@@ -1,1 +1,9 @@
-<p>products-admin works!</p>
+<app-table [data]="products"
+					 [config]="config"
+					 [selectable]="true"
+					 [allowAdd]="true"
+					 [allowEdit]="true"
+					 [allowDelete]="true"
+					 [entity]="Product"
+					 (deleted)="deleteProducts($event)"
+></app-table>

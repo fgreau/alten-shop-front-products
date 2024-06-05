@@ -74,11 +74,16 @@ export class TableComponent<T> implements OnChanges {
 
   public onDelete(id: number): void {
     this.deleted.emit([id]);
+    let index = this.selectedEntries.findIndex(item => item.id === id)
+    if (index > -1) {
+      this.selectedEntries.splice(index, 1)
+    }
   }
 
   public onDeleteMultiple(): void {
     const ids = this.selectedEntries.map(entry => entry.id);
     this.deleted.emit(ids);
+    this.selectedEntries = [];
   }
 
   public manageColumns(): void {
