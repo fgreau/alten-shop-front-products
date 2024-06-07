@@ -1,0 +1,3 @@
+CREATE SCHEMA altenshop;
+GRANT ALL PRIVILEGES ON SCHEMA altenshop TO altenshop;
+CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA altenshop;
