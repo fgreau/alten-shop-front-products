@@ -9,38 +9,40 @@
 
 
 <ng-template #listProductTemplate let-product>
-	<div class="list-product-section">
-		<div><span class="pi pi-tag"></span> {{ product['category'] }}</div>
-		<div>{{ product['inventoryStatus'] }}</div>
-	</div>
+	<div class="list-product-line">
+		<div class="list-product-section">
+			<div><span class="pi pi-tag"></span> {{ product['category'] }}</div>
+			<div>{{ product['inventoryStatus'] }}</div>
+		</div>
 
-	<div class="list-product-section">
-		<div>{{ product['name'] }}</div>
-		<div>{{ product['description'] }}</div>
-	</div>
+		<div class="list-product-section">
+			<div>{{ product['name'] }}</div>
+			<div>{{ product['description'] }}</div>
+		</div>
 
-	<div class="list-product-section">
-		<p-rating *ngIf="product['rating'] != null"
-							[ngModel]="Math.round(product['rating'])"
-							[readonly]="true"
-							[cancel]="false"
-							pTooltip="{{ product['rating'] }}/5"
-							tooltipPosition="left"
-		></p-rating>
-	</div>
+		<div class="list-product-section">
+			<p-rating *ngIf="product['rating'] != null"
+								[ngModel]="Math.round(product['rating'])"
+								[readonly]="true"
+								[cancel]="false"
+								pTooltip="{{ product['rating'] }}/5"
+								tooltipPosition="left"
+			></p-rating>
+		</div>
 
-	<div class="list-product-end">
-		<div>${{ product['price'] }}</div>
-		<p-button *ngIf="product['quantity'] > 0"
-							icon="pi pi-shopping-cart"
-							pTooltip="Add to shopping cart"
-							(onClick)="addToCart(product)"
-		></p-button>
-		<p-button *ngIf="product['quantity'] <= 0"
-							icon="pi pi-shopping-cart"
-							pTooltip="Out of stock"
-							[disabled]="true"
-		></p-button>
+		<div class="list-product-end">
+			<div>{{ product['price'] | currency:'USD':'symbol':'1.2-2' }}</div>
+			<p-button *ngIf="product['quantity'] > 0"
+								icon="pi pi-shopping-cart"
+								pTooltip="Add to shopping cart"
+								(onClick)="addToCart(product)"
+			></p-button>
+			<p-button *ngIf="product['quantity'] <= 0"
+								icon="pi pi-shopping-cart"
+								pTooltip="Out of stock"
+								[disabled]="true"
+			></p-button>
+		</div>
 	</div>
 </ng-template>
 
@@ -63,7 +65,7 @@
 	</div>
 
 	<div class="grid-product-bottom-line">
-		<div>${{ product['price'] }}</div>
+		<div>{{ product['price']  | currency:'USD':'symbol':'1.2-2' }}</div>
 		<p-button *ngIf="product['quantity'] > 0"
 							icon="pi pi-shopping-cart"
 							pTooltip="Add to shopping cart"

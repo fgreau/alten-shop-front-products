@@ -6,14 +6,26 @@
   user-select: none;
 }
 
+.list-product-line {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 200px;
+  gap: 20px;
+  width: 100%;
+  align-items: center;
+}
+
 .list-product-section {
-  flex: 1 1 0;
+  overflow: hidden;
+
+  > div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .list-product-end {
-  flex: 0 0 auto;
   margin-left: auto;
-  width: 100px;
   justify-content: flex-end;
 }
 
@@ -25,4 +37,11 @@
 
 .grid-product-section {
   text-align: center;
+  max-width: 100%;
+
+  > div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
