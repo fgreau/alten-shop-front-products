@@ -109,5 +109,29 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="202406111200-fgreau" author="fgreau">
+		<comment>fix-category-case</comment>
+
+		<sql>
+			UPDATE product
+			SET category = UPPER(category);
+		</sql>
+	</changeSet>
+
+	<changeSet id="202406111430-fgreau" author="fgreau">
+		<comment>adding-logic-deletion-column</comment>
+
+		<addColumn tableName="product">
+			<column name="deleted" type="boolean" defaultValue="false"/>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="202406111432-fgreau" author="fgreau">
+		<comment>adding-logic-deletion-column-index</comment>
+
+		<createIndex tableName="product" indexName="idx_product_deleted" unique="false">
+			<column name="deleted"/>
+		</createIndex>
+	</changeSet>
 
 </databaseChangeLog>

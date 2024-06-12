@@ -9,4 +9,5 @@ export class Product {
   category: string;
   image?: string;
   rating?: number;
+  deleted: boolean = false;
 }
