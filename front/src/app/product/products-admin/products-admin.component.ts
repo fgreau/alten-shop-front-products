@@ -119,5 +119,10 @@ export class ProductsAdminComponent implements OnInit {
     }
   }
 
+  load(event: any) {
+    console.log(event)
+    // TODO : implement product fetching and check code/name filters
+  }
+
   protected readonly Product = Product;
 }

@@ -17,6 +17,7 @@ import { DynamicFormControlComponent } from './ui/dynamic-form-control/dynamic-f
 import { TableToolbarComponent } from './ui/table/table-toolbar/table-toolbar.component';
 import { TableFilterCellComponent } from './ui/table/table-filter-cell/table-filter-cell.component';
 import { TableActionsCellComponent } from './ui/table/table-actions-cell/table-actions-cell.component';
+import { RestApiService } from "./utils/rest-api/rest-api.service";
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { TableActionsCellComponent } from './ui/table/table-actions-cell/table-a
   ],
   providers: [
     DynamicFormService,
-    ListService
+    ListService,
+    RestApiService,
   ],
   imports: [
     CommonModule,

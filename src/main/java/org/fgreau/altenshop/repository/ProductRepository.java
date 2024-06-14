@@ -27,4 +27,29 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
      * @return pageable list
      */
     Page<Product> findByDeletedFalse(Pageable pageable);
+
+    /**
+     * Returns a pageable list of all elements that have not been deleted, with code and name filters.
+     * @param codeFilter code contains
+     * @param nameFilter name contains
+     * @param pageable pageable parameters
+     * @return pageable list
+     */
+    Page<Product> findByCodeContainsIgnoreCaseAndNameContainsIgnoreCaseAndDeletedFalse(String codeFilter, String nameFilter, Pageable pageable);
+
+    /**
+     * Returns a pageable list of all elements that have not been deleted, with code filters.
+     * @param codeFilter code contains
+     * @param pageable pageable parameters
+     * @return pageable list
+     */
+    Page<Product> findByCodeContainsIgnoreCaseAndDeletedFalse(String codeFilter, Pageable pageable);
+
+    /**
+     * Returns a pageable list of all elements that have not been deleted, with name filters.
+     * @param nameFilter name contains
+     * @param pageable pageable parameters
+     * @return pageable list
+     */
+    Page<Product> findByNameContainsIgnoreCaseAndDeletedFalse(String nameFilter, Pageable pageable);
 }

@@ -5,6 +5,7 @@ import { PrimeNGConfig, SelectItem } from 'primeng/api';
 import { DataView } from 'primeng/dataview';
 import { debounceTime } from 'rxjs/operators';
 import { ListService } from './list.service';
+import { LoadingService } from "../../utils/loading/loading.service";
 
 export interface ListHeaderOptionsBase {
   search: string;
@@ -59,15 +60,19 @@ export class ListComponent<T> implements OnInit {
   public selection: (T&{id})[] = [];
 
   private firstLoad = true;
+  public isLoading: boolean;
 
   constructor(
     private readonly primengConfig: PrimeNGConfig,
-    private readonly listService: ListService
+    private readonly listService: ListService,
+    private readonly loadingService: LoadingService
   ) {
 
   }
 
   ngOnInit(): void {
+    this.loadingService.isLoading$.subscribe(loading => this.isLoading = loading);
+
     this.searchParams = this.listService.getSearchConfig(this.listKey, this.sortKey);
 
     this.primengConfig.ripple = true;
@@ -133,7 +138,7 @@ export class ListComponent<T> implements OnInit {
   public onPageChange(event: PaginationEvent) {
     if (!this.firstLoad) {
       this.storeSearchParams({ first: event.first, rows: event.rows });
-      this.pageChanged.emit(event);
+      this.pageChanged.emit(this.searchParams);
     }
     this.firstLoad = false;
   }

@@ -5,5 +5,7 @@
 					 [allowEdit]="true"
 					 [allowDelete]="true"
 					 [entity]="Product"
+					 [lazy]="true"
 					 (deleted)="deleteProducts($event)"
+					 (lazyLoaded)="load($event)"
 ></app-table>

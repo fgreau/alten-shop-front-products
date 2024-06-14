@@ -13,6 +13,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -39,7 +40,8 @@ public class ProductController {
 
     /**
      * Constructor.
-     * @param productMapper Product Mapper
+     *
+     * @param productMapper     Product Mapper
      * @param productRepository Product Repository
      */
     public ProductController(final ProductMapper productMapper, final ProductRepository productRepository, final PagedResourcesAssembler<ProductDTO> pagedResourcesAssembler) {
@@ -51,18 +53,45 @@ public class ProductController {
     /**
      * Returns a pageable list of products.
      *
-     * @param pageable pageable properties
+     * @param codeFilter filters products with codes containing this value, ignoring case
+     * @param nameFilter filters products with names containing this value, ignoring case
+     * @param pageable   pageable properties
      * @return products
      */
     @GetMapping
-    public PagedModel<EntityModel<ProductDTO>> getAllProductsPageable(@SortDefault("id") final Pageable pageable) {
-        final Page<ProductDTO> products = productRepository.findByDeletedFalse(pageable)
-            .map(productMapper::map);
+    public PagedModel<EntityModel<ProductDTO>> getAllProductsPageable(
+        @RequestParam(value = "code", required = false) String codeFilter,
+        @RequestParam(value = "name", required = false) String nameFilter,
+        @SortDefault("id") final Pageable pageable
+    ) {
+        final Page<ProductDTO> products;
+
+        // both filters
+        if (codeFilter != null && nameFilter != null) {
+            products = productRepository.findByCodeContainsIgnoreCaseAndNameContainsIgnoreCaseAndDeletedFalse(codeFilter, nameFilter, pageable).map(productMapper::map);
+        }
+
+        // only code filter
+        else if (codeFilter != null) {
+            products = productRepository.findByCodeContainsIgnoreCaseAndDeletedFalse(codeFilter, pageable).map(productMapper::map);
+        }
+
+        // only name filter
+        else if (nameFilter != null) {
+            products = productRepository.findByNameContainsIgnoreCaseAndDeletedFalse(nameFilter, pageable).map(productMapper::map);
+        }
+
+        // no filter param
+        else {
+            products = productRepository.findByDeletedFalse(pageable).map(productMapper::map);
+        }
+
         return pagedResourcesAssembler.toModel(products);
     }
 
     /**
      * Returns the details of a product.
+     *
      * @param id product id
      * @return DTO
      */

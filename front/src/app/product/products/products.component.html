@@ -1,13 +1,16 @@
 <app-list [items]="products"
 					[pagination]="true"
-					[totalRecords]="products.length"
+					[totalRecords]="totalProducts"
 					[listItemTemplate]="listProductTemplate"
 					[gridItemTemplate]="gridProductTemplate"
 					[sortOptions]="sortOptions"
 					[sortKey]="'name'"
+					[backEndSearch]="true"
+					(pageChanged)="updateProductList($event)"
+					(filtered)="updateProductList($event)"
 ></app-list>
 
-
+<!-- List item template -->
 <ng-template #listProductTemplate let-product>
 	<div class="list-product-line">
 		<div class="list-product-section">
@@ -46,7 +49,7 @@
 	</div>
 </ng-template>
 
-
+<!-- Grid item template -->
 <ng-template #gridProductTemplate let-product>
 	<div class="grid-product-section">
 		<div><span class="pi pi-tag"></span> {{ product['category'] }}</div>

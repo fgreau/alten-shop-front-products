@@ -1,8 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Product } from "../product.model";
-import mockedProducts from '../../../assets/products.json'
 import { SelectItem } from "primeng/api";
 import { SnackbarService } from "../../shared/utils/snackbar/snackbar.service";
+import { LoadingService } from "../../shared/utils/loading/loading.service";
+import { PaginationEvent } from "../../shared/ui/list/list.component";
+import { ProductService } from "../product.service";
+import { DEFAULT_SEARCH_PARAMS, SearchParams } from "../../shared/ui/list/search.model";
+
+const DEFAULT_PRODUCT_SEARCH_PARAMS: SearchParams = { ...DEFAULT_SEARCH_PARAMS, sortField: 'id'}
 
 @Component({
   selector: 'app-products',
@@ -11,10 +16,11 @@ import { SnackbarService } from "../../shared/utils/snackbar/snackbar.service";
 })
 export class ProductsComponent implements OnInit {
 
-  products: Product[]
+  products: Product[] = []
+  totalProducts: number = 0
   sortOptions: SelectItem[];
 
-  constructor(private snackbarService: SnackbarService) {
+  constructor(private snackbarService: SnackbarService, private loadingService: LoadingService, private productService: ProductService) {
     this.sortOptions = [
       { label: 'Name ▲', value: 'asc-name' },
       { label: 'Name ▼', value: 'desc-name' },
@@ -32,10 +38,27 @@ export class ProductsComponent implements OnInit {
   }
 
   getData(): void {
-    //TODO switch to the GET method when the backend is done
+    this.productService.getAll(DEFAULT_PRODUCT_SEARCH_PARAMS)
+      .subscribe(response => {
+        console.log('response : ', response)
+        this.products = response._embedded.productDTOList
+        this.totalProducts = response.page.totalElements
+        this.loadingService.stop()
+      })
 
-    // fill the products array with elements from the json file
-    this.products = mockedProducts.data
+  }
+
+  updateProductList(event: PaginationEvent): void {
+    console.log(event)
+
+    this.loadingService.start("spin")
+    this.productService.getAll({ ...DEFAULT_PRODUCT_SEARCH_PARAMS, ...event })
+      .subscribe(response => {
+        console.log('response : ', response)
+        this.products = response._embedded.productDTOList
+        this.totalProducts = response.page.totalElements
+        this.loadingService.stop()
+      })
   }
 
   addToCart(product: Product): void {
