@@ -1,12 +1,8 @@
 package org.fgreau.altenshop.controller;
 
 import org.fgreau.altenshop.dto.ProductDTO;
-import org.fgreau.altenshop.exception.NotFoundException;
-import org.fgreau.altenshop.mapper.ProductMapper;
-import org.fgreau.altenshop.repository.ProductRepository;
-import org.springframework.data.domain.Page;
+import org.fgreau.altenshop.service.ProductService;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.data.web.SortDefault;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -24,30 +20,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProductController {
 
     /**
-     * Product Mapper.
+     * Product Service.
      */
-    private final ProductMapper productMapper;
-
-    /**
-     * Product Repository.
-     */
-    private final ProductRepository productRepository;
-
-    /**
-     * Assembler to handle pagination.
-     */
-    private final PagedResourcesAssembler<ProductDTO> pagedResourcesAssembler;
+    private final ProductService productService;
 
     /**
      * Constructor.
      *
-     * @param productMapper     Product Mapper
-     * @param productRepository Product Repository
+     * @param productService Product Service
      */
-    public ProductController(final ProductMapper productMapper, final ProductRepository productRepository, final PagedResourcesAssembler<ProductDTO> pagedResourcesAssembler) {
-        this.productMapper = productMapper;
-        this.productRepository = productRepository;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
+    public ProductController(final ProductService productService) {
+        this.productService = productService;
     }
 
     /**
@@ -64,29 +47,7 @@ public class ProductController {
         @RequestParam(value = "name", required = false) String nameFilter,
         @SortDefault("id") final Pageable pageable
     ) {
-        final Page<ProductDTO> products;
-
-        // both filters
-        if (codeFilter != null && nameFilter != null) {
-            products = productRepository.findByCodeContainsIgnoreCaseAndNameContainsIgnoreCaseAndDeletedFalse(codeFilter, nameFilter, pageable).map(productMapper::map);
-        }
-
-        // only code filter
-        else if (codeFilter != null) {
-            products = productRepository.findByCodeContainsIgnoreCaseAndDeletedFalse(codeFilter, pageable).map(productMapper::map);
-        }
-
-        // only name filter
-        else if (nameFilter != null) {
-            products = productRepository.findByNameContainsIgnoreCaseAndDeletedFalse(nameFilter, pageable).map(productMapper::map);
-        }
-
-        // no filter param
-        else {
-            products = productRepository.findByDeletedFalse(pageable).map(productMapper::map);
-        }
-
-        return pagedResourcesAssembler.toModel(products);
+        return this.productService.getAllProductsPageable(codeFilter, nameFilter, pageable);
     }
 
     /**
@@ -97,8 +58,6 @@ public class ProductController {
      */
     @GetMapping(value = "/{productId}")
     public ProductDTO getProductDetails(@PathVariable("productId") Long id) {
-        return productRepository.findByIdAndDeletedFalse(id)
-            .map(productMapper::map)
-            .orElseThrow(() -> new NotFoundException("Product " + id + " not found"));
+        return this.productService.getProductDetails(id);
     }
 }
