@@ -1,6 +1,12 @@
 package org.fgreau.altenshop.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.fgreau.altenshop.enums.InventoryStatus;
@@ -32,13 +38,13 @@ public class Product implements Serializable {
     /**
      * Reference code for the product.
      */
-    @Column(name = "code")
+    @Column(name = "code", nullable = false)
     private String code;
 
     /**
      * Product's name.
      */
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     /**
@@ -50,27 +56,27 @@ public class Product implements Serializable {
     /**
      * Price, in USD.
      */
-    @Column(name = "price")
+    @Column(name = "price", nullable = false)
     private float price;
 
     /**
      * Available quantity in inventory.
      */
-    @Column(name = "quantity")
+    @Column(name = "quantity", nullable = false)
     private int quantity;
 
     /**
      * Status of the inventory, generally depending on the quantity.
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "inventory_status")
+    @Column(name = "inventory_status", nullable = false)
     private InventoryStatus inventoryStatus;
 
     /**
      * Product's category.
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "category")
+    @Column(name = "category", nullable = false)
     private ProductCategory category;
 
     /**
@@ -83,11 +89,11 @@ public class Product implements Serializable {
      * Rating of the product, between 0 and 5 included.
      */
     @Column(name = "rating")
-    private float rating;
+    private Float rating;
 
     /**
      * Logic deletion.
      */
-    @Column(name = "deleted")
+    @Column(name = "deleted", nullable = false)
     private boolean deleted;
 }

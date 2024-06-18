@@ -122,7 +122,7 @@
 		<comment>adding-logic-deletion-column</comment>
 
 		<addColumn tableName="product">
-			<column name="deleted" type="boolean" defaultValue="false"/>
+			<column name="deleted" type="boolean" defaultValue="false" />
 		</addColumn>
 	</changeSet>
 
@@ -132,6 +132,12 @@
 		<createIndex tableName="product" indexName="idx_product_deleted" unique="false">
 			<column name="deleted"/>
 		</createIndex>
+	</changeSet>
+
+	<changeSet id="202406181145-fgreau" author="fgreau">
+		<comment>adding-not-null-constraint-on-logic-deletion</comment>
+
+		<addNotNullConstraint tableName="product" columnName="deleted" defaultNullValue="false"/>
 	</changeSet>
 
 </databaseChangeLog>
