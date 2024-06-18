@@ -5,6 +5,12 @@ import { SnackbarService } from "../../shared/utils/snackbar/snackbar.service";
 import { CrudItemOptions } from "../../shared/utils/crud-item-options/crud-item-options.model";
 import { ControlType } from "../../shared/utils/crud-item-options/control-type.model";
 import { Validators } from "@angular/forms";
+import { ProductService } from "../product.service";
+import { DEFAULT_SEARCH_PARAMS, SearchParams } from "../../shared/ui/list/search.model";
+import { LazyLoadEvent } from "primeng/api";
+import { SearchService } from "../../shared/ui/list/search.service";
+
+const DEFAULT_PRODUCT_SEARCH_PARAMS: SearchParams = { ...DEFAULT_SEARCH_PARAMS, sortField: 'id' }
 
 @Component({
   selector: 'app-products-admin',
@@ -13,10 +19,11 @@ import { Validators } from "@angular/forms";
 })
 export class ProductsAdminComponent implements OnInit {
 
-  products: Product[]
+  products: Product[] = []
+  totalProducts: number = 0
   config: CrudItemOptions[]
 
-  constructor(private snackbarService: SnackbarService) {
+  constructor(private snackbarService: SnackbarService, private productService: ProductService, private searchService: SearchService) {
     this.config = [
       {
         key: 'category',
@@ -72,10 +79,26 @@ export class ProductsAdminComponent implements OnInit {
   }
 
   getData(): void {
-    //TODO switch to the GET method when the backend is done
+    this.productService.getAll(DEFAULT_PRODUCT_SEARCH_PARAMS)
+      .subscribe(response => {
+        console.log('response : ', response)
+        this.products = response._embedded.productDTOList
+        this.totalProducts = response.page.totalElements
+      })
 
     // fill the products array with elements from the json file
     this.products = mockedProducts.data
+  }
+
+  updateProductList(event: LazyLoadEvent): void {
+    console.log('event : ', event)
+    console.log('searchParams : ', this.searchService.mapToSearchParams(event, 'id'))
+    this.productService.getAll(this.searchService.mapToSearchParams(event, 'id'))
+      .subscribe(response => {
+        console.log('response : ', response)
+        this.products = response._embedded ? response._embedded.productDTOList : []
+        this.totalProducts = response.page.totalElements
+      })
   }
 
   deleteProduct(id: number): void {
@@ -118,11 +141,5 @@ export class ProductsAdminComponent implements OnInit {
 
     }
   }
-
-  load(event: any) {
-    console.log(event)
-    // TODO : implement product fetching and check code/name filters
-  }
-
   protected readonly Product = Product;
 }

@@ -18,6 +18,7 @@ import { TableToolbarComponent } from './ui/table/table-toolbar/table-toolbar.co
 import { TableFilterCellComponent } from './ui/table/table-filter-cell/table-filter-cell.component';
 import { TableActionsCellComponent } from './ui/table/table-actions-cell/table-actions-cell.component';
 import { RestApiService } from "./utils/rest-api/rest-api.service";
+import { SearchService } from "./ui/list/search.service";
 
 @NgModule({
   declarations: [
@@ -39,6 +40,7 @@ import { RestApiService } from "./utils/rest-api/rest-api.service";
     DynamicFormService,
     ListService,
     RestApiService,
+    SearchService,
   ],
   imports: [
     CommonModule,

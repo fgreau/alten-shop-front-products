@@ -5,6 +5,7 @@ import { SnackbarService } from "../../shared/utils/snackbar/snackbar.service";
 import { PaginationEvent } from "../../shared/ui/list/list.component";
 import { ProductService } from "../product.service";
 import { DEFAULT_SEARCH_PARAMS, SearchParams } from "../../shared/ui/list/search.model";
+import { SearchService } from "../../shared/ui/list/search.service";
 
 const DEFAULT_PRODUCT_SEARCH_PARAMS: SearchParams = { ...DEFAULT_SEARCH_PARAMS, sortField: 'id' }
 
@@ -19,7 +20,7 @@ export class ProductsComponent implements OnInit {
   totalProducts: number = 0
   sortOptions: SelectItem[];
 
-  constructor(private snackbarService: SnackbarService, private productService: ProductService) {
+  constructor(private snackbarService: SnackbarService, private productService: ProductService, private searchService: SearchService) {
     this.sortOptions = [
       { label: 'Name ▲', value: 'asc-name' },
       { label: 'Name ▼', value: 'desc-name' },
@@ -47,7 +48,7 @@ export class ProductsComponent implements OnInit {
   }
 
   updateProductList(event: PaginationEvent): void {
-    this.productService.getAll(this.formatSearchParam({ ...DEFAULT_PRODUCT_SEARCH_PARAMS, ...event }))
+    this.productService.getAll(this.searchService.formatSearchFilter({ ...DEFAULT_PRODUCT_SEARCH_PARAMS, ...event }))
       .subscribe(response => {
         console.log('response : ', response)
         this.products = response._embedded.productDTOList
@@ -58,13 +59,6 @@ export class ProductsComponent implements OnInit {
   addToCart(product: Product): void {
     this.snackbarService.displaySuccess(`Product [${ product.name }] added to your cart!`)
     setTimeout(() => this.snackbarService.displayInfo('Well... In theory. There is no cart yet ☹️'), 2000)
-  }
-
-  private formatSearchParam(searchParams: SearchParams): SearchParams {
-    if (searchParams.search) {
-      return { ...searchParams, filters: { name: { value: searchParams.search } } }
-    }
-    return searchParams
   }
 
   protected readonly Math = Math

@@ -1,4 +1,5 @@
 <app-table [data]="products"
+					 [totalRecords]="totalProducts"
 					 [config]="config"
 					 [selectable]="true"
 					 [allowAdd]="true"
@@ -7,5 +8,5 @@
 					 [entity]="Product"
 					 [lazy]="true"
 					 (deleted)="deleteProducts($event)"
-					 (lazyLoaded)="load($event)"
+					 (lazyLoaded)="updateProductList($event)"
 ></app-table>

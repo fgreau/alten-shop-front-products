@@ -12,9 +12,9 @@ export interface SearchParams {
     filters?: {
         [s: string]: FilterMetadata;
     };
-  }
+}
 
-  export const DEFAULT_SEARCH_PARAMS: SearchParams = {
+export const DEFAULT_SEARCH_PARAMS: SearchParams = {
     first: 0,
     rows: 10,
     sortField: 'title',
@@ -22,9 +22,9 @@ export interface SearchParams {
     search: '',
     from: null,
     to: null
-  }
+}
 
-  export const enum Sort {
+export const enum Sort {
     asc = 'asc',
     desc = 'desc'
-  }
+}
