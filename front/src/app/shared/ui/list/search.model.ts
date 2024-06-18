@@ -1,3 +1,5 @@
+import { FilterMetadata } from "primeng/api";
+
 export interface SearchParams {
     first: number;
     rows: number;
@@ -7,6 +9,9 @@ export interface SearchParams {
     from: number;
     to: number;
     parentId?: string;
+    filters?: {
+        [s: string]: FilterMetadata;
+    };
   }
 
   export const DEFAULT_SEARCH_PARAMS: SearchParams = {

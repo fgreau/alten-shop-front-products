@@ -20,14 +20,16 @@ export class RestApiService<T> {
       .set('size', parameters.rows.toString())
 
     if (parameters.sortField) {
-      params = params.set('sort', `${parameters.sortField},${parameters.sortOrder}`)
+      params = params.set('sort', `${ parameters.sortField },${ parameters.sortOrder }`)
     }
 
-    if (parameters.search) {
-      params = params.set('search', parameters.search)
+    if (parameters.filters) {
+      Object.entries(parameters.filters).forEach(([key, value]) => {
+        params = params.set(key, value.value)
+      })
     }
 
-    return this.http.get<PageableResponse<T>>(this.apiUrl, {params})
+    return this.http.get<PageableResponse<T>>(this.apiUrl, { params })
   }
 
 }
