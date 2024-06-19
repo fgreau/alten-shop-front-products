@@ -7,12 +7,15 @@ import org.fgreau.altenshop.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.List;
+
+import static java.util.function.Predicate.not;
 
 @Service
 public class ProductService {
@@ -31,6 +34,8 @@ public class ProductService {
      * Assembler to handle pagination.
      */
     private final PagedResourcesAssembler<ProductDTO> pagedResourcesAssembler;
+
+    private static final List<String> ALLOWED_SORT_PROPERTIES = List.of("id", "code", "name", "price", "quantity", "inventoryStatus", "category", "rating");
 
     /**
      * Constructor.
@@ -55,8 +60,7 @@ public class ProductService {
      */
     public PagedModel<EntityModel<ProductDTO>> getAllProductsPageable(final String codeFilter, final String nameFilter, final Pageable pageable) {
 
-        // Ensures that the pageable is never null
-        final Pageable localPageable = Optional.ofNullable(pageable).orElse(PageRequest.of(0, 10));
+        final Pageable localPageable = validatePageable(pageable, ALLOWED_SORT_PROPERTIES);
 
         final Page<ProductDTO> products;
 
@@ -81,6 +85,44 @@ public class ProductService {
         }
 
         return pagedResourcesAssembler.toModel(products);
+    }
+
+    /**
+     * Ensures that the pageable is never null or with invalid parameters.
+     *
+     * @param pageable input pageable
+     * @param allowedProperties list of allowed sorting property values
+     * @return compliant pageable
+     */
+    public Pageable validatePageable(final Pageable pageable, final List<String> allowedProperties) {
+
+        if (pageable == null) {
+            return PageRequest.of(0, 10);
+        }
+
+        final int pageNumber = pageable.getPageNumber();
+        final int pageSize = pageable.getPageSize();
+
+        if (allowedProperties == null || allowedProperties.isEmpty()) {
+            return PageRequest.of(pageNumber, pageSize);
+        }
+
+        // Checks if any sort property is non-compliant, and if so, removes them
+        if (!pageable.getSort().isEmpty()) {
+            if (pageable.getSort().get().map(Sort.Order::getProperty).anyMatch(not(allowedProperties::contains))) {
+
+                final Sort compliantSort = Sort.by(
+                    pageable.getSort()
+                        .get()
+                        .filter(sort -> allowedProperties.contains(sort.getProperty()))
+                        .toList()
+                );
+
+                return PageRequest.of(pageNumber, pageSize, compliantSort);
+            }
+        }
+
+        return pageable;
     }
 
     /**
