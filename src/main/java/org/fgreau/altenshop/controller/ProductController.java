@@ -1,5 +1,7 @@
 package org.fgreau.altenshop.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.fgreau.altenshop.dto.ProductDTO;
 import org.fgreau.altenshop.service.ProductService;
 import org.springframework.data.domain.Pageable;
@@ -42,9 +44,13 @@ public class ProductController {
      * @return products
      */
     @GetMapping
+    @Operation(summary = "Returns a pageable list of products")
     public PagedModel<EntityModel<ProductDTO>> getAllProductsPageable(
+        @Parameter(description = "Filter products by code (contains)")
         @RequestParam(value = "code", required = false) String codeFilter,
+        @Parameter(description = "Filter products by name (contains)")
         @RequestParam(value = "name", required = false) String nameFilter,
+        @Parameter(description = "Pagination parameters", example = "{\"page\":0,\"size\":10,\"sort\":[\"name\",\"price,desc\"]}")
         @SortDefault("id") final Pageable pageable
     ) {
         return this.productService.getAllProductsPageable(codeFilter, nameFilter, pageable);
@@ -57,6 +63,7 @@ public class ProductController {
      * @return DTO
      */
     @GetMapping(value = "/{productId}")
+    @Operation(summary = "Returns the details of a product")
     public ProductDTO getProductDetails(@PathVariable("productId") Long id) {
         return this.productService.getProductDetails(id);
     }
