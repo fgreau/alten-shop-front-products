@@ -1,6 +1,9 @@
 package org.fgreau.altenshop.service;
 
 import org.fgreau.altenshop.dto.ProductDTO;
+import org.fgreau.altenshop.dto.ProductPatchDTO;
+import org.fgreau.altenshop.enums.ProductCategory;
+import org.fgreau.altenshop.exception.BadRequestException;
 import org.fgreau.altenshop.exception.NotFoundException;
 import org.fgreau.altenshop.mapper.ProductMapper;
 import org.fgreau.altenshop.model.Product;
@@ -214,6 +217,120 @@ public class ProductServiceTests {
     }
 
     // *** createProduct ***
+
+    @Test
+    public void createProduct_fullDto() {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setName(NAME);
+        dto.setDescription("description");
+        dto.setPrice(25F);
+        dto.setQuantity(20);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+        dto.setImage("image");
+        dto.setRating(2.5F);
+
+        when(productRepository.existsByCode(anyString())).thenReturn(false);
+        when(productMapper.map(any(ProductPatchDTO.class))).thenReturn(new Product());
+        when(productRepository.save(any(Product.class))).thenReturn(new Product());
+        when(productMapper.map(any(Product.class))).thenReturn(new ProductDTO());
+
+        productService.createProduct(dto);
+
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @Test
+    public void createProduct_minimalDto() {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setName(NAME);
+        dto.setPrice(25F);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+
+        when(productRepository.existsByCode(anyString())).thenReturn(false);
+        when(productMapper.map(any(ProductPatchDTO.class))).thenReturn(new Product());
+        when(productRepository.save(any(Product.class))).thenReturn(new Product());
+        when(productMapper.map(any(Product.class))).thenReturn(new ProductDTO());
+
+        productService.createProduct(dto);
+
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @Test
+    public void createProduct_codeAlreadyExists() {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setName(NAME);
+        dto.setPrice(25F);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+
+        when(productRepository.existsByCode(anyString())).thenReturn(true);
+
+        final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.createProduct(dto));
+
+        assertEquals("Product with code " + CODE + " already exists", badRequestException.getMessage());
+    }
+
+    @Test public void createProduct_missingCode() {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setName(NAME);
+        dto.setPrice(25F);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+
+        final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.createProduct(dto));
+
+        assertEquals("New product is missing mandatory field(s) : [code]", badRequestException.getMessage());
+
+    }
+
+    @Test public void createProduct_missingName() {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setPrice(25F);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+
+        final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.createProduct(dto));
+
+        assertEquals("New product is missing mandatory field(s) : [name]", badRequestException.getMessage());
+    }
+
+    @Test public void createProduct_missingPrice() {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setName(NAME);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+
+        final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.createProduct(dto));
+
+        assertEquals("New product is missing mandatory field(s) : [price]", badRequestException.getMessage());
+    }
+
+    @Test public void createProduct_missingCategory() {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setName(NAME);
+        dto.setPrice(25F);
+
+        final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.createProduct(dto));
+
+        assertEquals("New product is missing mandatory field(s) : [category]", badRequestException.getMessage());
+    }
+
+    @Test public void createProduct_missingSeveralFields() {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.createProduct(dto));
+        assertEquals("New product is missing mandatory field(s) : [code,name,price,category]", badRequestException.getMessage());
+    }
 
     // *** updateProduct ***
 

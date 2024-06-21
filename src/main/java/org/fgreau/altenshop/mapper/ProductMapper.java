@@ -51,7 +51,7 @@ public interface ProductMapper {
     void patchValues(@MappingTarget final Product product, final ProductPatchDTO productPatchDTO);
 
     @Named("mapInventoryStatus")
-    static InventoryStatus mapInventoryStatus(final int quantity) {
+    default InventoryStatus mapInventoryStatus(final int quantity) {
         if (quantity <= 0) {
             return InventoryStatus.OUTOFSTOCK;
         }

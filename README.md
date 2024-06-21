@@ -13,8 +13,7 @@ To run this project, you will need the following tools :
 ## Starting the application
 
 To be able to run the application, you first need to start the database container.  
-For the sake of simplicity, you can just run the full docker-compose with this command : `docker-compose up --build
-`.
+For the sake of simplicity, you can just run the full docker-compose with this command : `docker-compose up --build`.
 
 When the database is up, you can build your back-end application using maven : `mvn clean compile -DskipTests`.  
 Then you can simply run the application, ensuring the `dev` profile is active : `mvn spring-boot:run -D"spring-boot.run.profiles"=dev`.

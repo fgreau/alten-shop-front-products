@@ -2,8 +2,10 @@ package org.fgreau.altenshop.service;
 
 import org.fgreau.altenshop.dto.ProductDTO;
 import org.fgreau.altenshop.dto.ProductPatchDTO;
+import org.fgreau.altenshop.exception.BadRequestException;
 import org.fgreau.altenshop.exception.NotFoundException;
 import org.fgreau.altenshop.mapper.ProductMapper;
+import org.fgreau.altenshop.model.Product;
 import org.fgreau.altenshop.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +16,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.function.Predicate.not;
@@ -138,7 +141,6 @@ public class ProductService {
             .orElseThrow(() -> new NotFoundException("Product " + id + " not found"));
     }
 
-
     /**
      * Creates a new product.
      *
@@ -146,8 +148,48 @@ public class ProductService {
      * @return created product
      */
     public ProductDTO createProduct(final ProductPatchDTO newProduct) {
-        // TODO
-        return null;
+        final List<String> missingFields = checkMissingMandatoryFields(newProduct);
+
+        if (!missingFields.isEmpty()) {
+            throw new BadRequestException("New product is missing mandatory field(s) : [" + String.join(",", missingFields) + "]");
+        }
+
+        if (productRepository.existsByCode(newProduct.getCode())) {
+            throw new BadRequestException("Product with code " + newProduct.getCode() + " already exists");
+        }
+
+        final Product productToSave = productMapper.map(newProduct);
+        final Product savedProduct = productRepository.save(productToSave);
+
+        return productMapper.map(savedProduct);
+    }
+
+    /**
+     * Checks if any fields mandatory for product creation are missing.
+     *
+     * @param product new product fields
+     * @return list of missing fields
+     */
+    public List<String> checkMissingMandatoryFields(final ProductPatchDTO product) {
+        final List<String> missingfields = new ArrayList<>();
+
+        if (product.getCode() == null) {
+            missingfields.add("code");
+        }
+
+        if (product.getName() == null) {
+            missingfields.add("name");
+        }
+
+        if (product.getPrice() == null) {
+            missingfields.add("price");
+        }
+
+        if (product.getCategory() == null) {
+            missingfields.add("category");
+        }
+
+        return missingfields;
     }
 
     /**

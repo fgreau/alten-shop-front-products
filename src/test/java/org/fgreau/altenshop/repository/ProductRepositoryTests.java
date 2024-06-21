@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
@@ -129,6 +130,16 @@ public class ProductRepositoryTests {
     public void findByNameContainsIgnoreCaseAndDeletedFalse_noneMatch() {
         Page<Product> products = productRepository.findByNameContainsIgnoreCaseAndDeletedFalse(NAME_NON_EXISTENT, DEFAULT_PAGEABLE);
         assertTrue(products.isEmpty(), "Unexpected product found");
+    }
+
+    @Test
+    public void existsByCode_true() {
+        assertTrue(productRepository.existsByCode(CODE_EXISTENT), "Product not found");
+    }
+
+    @Test
+    public void existsByCode_false() {
+        assertFalse(productRepository.existsByCode(CODE_NON_EXISTENT), "Unexpected product found");
     }
 
 }
