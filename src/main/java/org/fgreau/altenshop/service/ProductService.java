@@ -1,6 +1,7 @@
 package org.fgreau.altenshop.service;
 
 import org.fgreau.altenshop.dto.ProductDTO;
+import org.fgreau.altenshop.dto.ProductPatchDTO;
 import org.fgreau.altenshop.exception.NotFoundException;
 import org.fgreau.altenshop.mapper.ProductMapper;
 import org.fgreau.altenshop.repository.ProductRepository;
@@ -90,7 +91,7 @@ public class ProductService {
     /**
      * Ensures that the pageable is never null or with invalid parameters.
      *
-     * @param pageable input pageable
+     * @param pageable          input pageable
      * @param allowedProperties list of allowed sorting property values
      * @return compliant pageable
      */
@@ -137,4 +138,39 @@ public class ProductService {
             .orElseThrow(() -> new NotFoundException("Product " + id + " not found"));
     }
 
+
+    /**
+     * Creates a new product.
+     *
+     * @param newProduct new product
+     * @return created product
+     */
+    public ProductDTO createProduct(final ProductPatchDTO newProduct) {
+        // TODO
+        return null;
+    }
+
+    /**
+     * Updates an existing product.
+     *
+     * @param id             existing product id
+     * @param updatedProduct new product values
+     * @return updated product
+     */
+    public ProductDTO updateProduct(final Long id, final ProductPatchDTO updatedProduct) {
+        // TODO
+        return null;
+    }
+
+    /**
+     * Deletes an existing product.
+     *
+     * @param id product id
+     */
+    public void deleteProduct(final Long id) {
+        productRepository.findByIdAndDeletedFalse(id)
+            .map(productMapper::deleteProduct)
+            .map(productRepository::save)
+            .orElseThrow(() -> new NotFoundException("Product " + id + " not found"));
+    }
 }

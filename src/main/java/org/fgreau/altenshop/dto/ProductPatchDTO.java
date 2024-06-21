@@ -1,19 +1,13 @@
 package org.fgreau.altenshop.dto;
 
 import lombok.Data;
-import org.fgreau.altenshop.enums.InventoryStatus;
 import org.fgreau.altenshop.enums.ProductCategory;
 
 /**
- * Product DTO.
+ * DTO used to create or update a ProductDTO.
  */
 @Data
-public class ProductDTO {
-
-    /**
-     * Identifier.
-     */
-    private Long id;
+public class ProductPatchDTO {
 
     /**
      * Reference code for the product.
@@ -33,17 +27,12 @@ public class ProductDTO {
     /**
      * Price, in USD.
      */
-    private float price;
+    private Float price;
 
     /**
      * Available quantity in inventory.
      */
-    private int quantity;
-
-    /**
-     * Status of the inventory, generally depending on the quantity.
-     */
-    private InventoryStatus inventoryStatus;
+    private Integer quantity;
 
     /**
      * Product's category.
@@ -59,9 +48,4 @@ public class ProductDTO {
      * Rating of the product, between 0 and 5 included.
      */
     private Float rating;
-
-    /**
-     * Logic deletion.
-     */
-    private boolean deleted;
 }

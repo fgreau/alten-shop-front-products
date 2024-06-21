@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.AdditionalAnswers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -206,6 +208,39 @@ public class ProductServiceTests {
         when(productRepository.findByIdAndDeletedFalse(anyLong())).thenReturn(Optional.empty());
 
         final NotFoundException exception = assertThrows(NotFoundException.class, () -> productService.getProductDetails(ID));
+
+        verify(productRepository).findByIdAndDeletedFalse(ID);
+        assertEquals("Product " + ID + " not found", exception.getMessage());
+    }
+
+    // *** createProduct ***
+
+    // *** updateProduct ***
+
+    // *** deleteProduct ***
+
+    @Test
+    public void deleteProduct_productFound() {
+        final Product initialProduct = new Product();
+        final Product deletedProduct = new Product();
+        deletedProduct.setDeleted(true);
+
+        when(productRepository.findByIdAndDeletedFalse(anyLong())).thenReturn(Optional.of(initialProduct));
+        when(productMapper.deleteProduct(any(Product.class))).thenReturn(deletedProduct);
+        when(productRepository.save(any(Product.class))).then(AdditionalAnswers.returnsFirstArg());
+
+        productService.deleteProduct(ID);
+
+        verify(productRepository).findByIdAndDeletedFalse(ID);
+        verify(productMapper).deleteProduct(initialProduct);
+        verify(productRepository).save(argThat(Product::isDeleted));
+    }
+
+    @Test
+    public void deleteProduct_productNotFound() {
+        when(productRepository.findByIdAndDeletedFalse(anyLong())).thenReturn(Optional.empty());
+
+        final NotFoundException exception = assertThrows(NotFoundException.class, () -> productService.deleteProduct(ID));
 
         verify(productRepository).findByIdAndDeletedFalse(ID);
         assertEquals("Product " + ID + " not found", exception.getMessage());
