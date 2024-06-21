@@ -14,5 +14,13 @@ services:
     ports:
       - "5432:5432"
 
+  angular-app:
+    container_name: front_altenshop
+    build:
+      context: ./front
+      dockerfile: dockerfile
+    ports:
+      - "4200:4200"
+
 volumes:
   db_data:

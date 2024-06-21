@@ -1,3 +1,41 @@
+# AltenShop
+### *AltenShop is a simple FullStack demo project centered around the Springboot and Angular frameworks.*
+
+## Getting started
+
+To run this project, you will need the following tools :
+- Maven 3.9.7 or later
+- Docker : 
+  - Engine 19.03.0 or later
+  - Docker Compose 1.25.0 or later
+- Java : JDK 21 or later
+
+## Starting the application
+
+To be able to run the application, you first need to start the database container.  
+For the sake of simplicity, you can just run the full docker-compose with this command : `docker-compose up --build
+`.
+
+When the database is up, you can build your back-end application using maven : `mvn clean compile -DskipTests`.  
+Then you can simply run the application, ensuring the `dev` profile is active : `mvn spring-boot:run -D"spring-boot.run.profiles"=dev`.
+
+Now that everything is running properly, you can either use the application through the front-end UI : [localhost:4200](http://localhost:4200/),
+or use the embedded Swagger UI : [localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html).
+
+## What's left to do
+
+Until this project can be considered done, it is still missing a few steps : 
+- [ ] Unit tests for service methods
+  - [ ] POST
+  - [ ] PATCH
+  - [x] PATCH
+- [ ] Writing the associated service methods
+-  [ ] Plug the front-end to these methods
+-  [ ] Complete this documentation
+
+
+___
+
 # Front-end
 
 Créer un module angular "product" avec 2 composants (basés sur primeng): 
