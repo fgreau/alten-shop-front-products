@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.AdditionalAnswers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -276,7 +277,8 @@ public class ProductServiceTests {
         assertEquals("Product with code " + CODE + " already exists", badRequestException.getMessage());
     }
 
-    @Test public void createProduct_missingCode() {
+    @Test
+    public void createProduct_missingCode() {
         final ProductPatchDTO dto = new ProductPatchDTO();
 
         dto.setName(NAME);
@@ -289,7 +291,8 @@ public class ProductServiceTests {
 
     }
 
-    @Test public void createProduct_missingName() {
+    @Test
+    public void createProduct_missingName() {
         final ProductPatchDTO dto = new ProductPatchDTO();
 
         dto.setCode(CODE);
@@ -301,7 +304,8 @@ public class ProductServiceTests {
         assertEquals("New product is missing mandatory field(s) : [name]", badRequestException.getMessage());
     }
 
-    @Test public void createProduct_missingPrice() {
+    @Test
+    public void createProduct_missingPrice() {
         final ProductPatchDTO dto = new ProductPatchDTO();
 
         dto.setCode(CODE);
@@ -313,7 +317,8 @@ public class ProductServiceTests {
         assertEquals("New product is missing mandatory field(s) : [price]", badRequestException.getMessage());
     }
 
-    @Test public void createProduct_missingCategory() {
+    @Test
+    public void createProduct_missingCategory() {
         final ProductPatchDTO dto = new ProductPatchDTO();
 
         dto.setCode(CODE);
@@ -325,11 +330,140 @@ public class ProductServiceTests {
         assertEquals("New product is missing mandatory field(s) : [category]", badRequestException.getMessage());
     }
 
-    @Test public void createProduct_missingSeveralFields() {
+    @Test
+    public void createProduct_missingSeveralFields() {
         final ProductPatchDTO dto = new ProductPatchDTO();
 
         final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.createProduct(dto));
         assertEquals("New product is missing mandatory field(s) : [code,name,price,category]", badRequestException.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(floats = { 0F, Float.MIN_VALUE, Float.MAX_VALUE, Float.POSITIVE_INFINITY })
+    public void createProduct_validPrice(final Float price) {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setName(NAME);
+        dto.setPrice(price);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+
+        when(productRepository.existsByCode(anyString())).thenReturn(false);
+        when(productMapper.map(any(ProductPatchDTO.class))).thenReturn(new Product());
+        when(productRepository.save(any(Product.class))).thenReturn(new Product());
+        when(productMapper.map(any(Product.class))).thenReturn(new ProductDTO());
+
+        productService.createProduct(dto);
+
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(floats = { Float.NEGATIVE_INFINITY, -Float.MAX_VALUE - Float.MIN_VALUE })
+    public void createProduct_invalidPrice(final Float price) {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setName(NAME);
+        dto.setPrice(price);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+
+        final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.createProduct(dto));
+
+        assertEquals("Invalid price value: the price must be greater or equal to zero", badRequestException.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, Integer.MAX_VALUE })
+    public void createProduct_validQuantity(final Integer quantity) {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setName(NAME);
+        dto.setPrice(25F);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+        dto.setQuantity(quantity);
+
+        when(productRepository.existsByCode(anyString())).thenReturn(false);
+        when(productMapper.map(any(ProductPatchDTO.class))).thenReturn(new Product());
+        when(productRepository.save(any(Product.class))).thenReturn(new Product());
+        when(productMapper.map(any(Product.class))).thenReturn(new ProductDTO());
+
+        productService.createProduct(dto);
+
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { Integer.MIN_VALUE, -1 })
+    public void createProduct_invalidQuantity(final Integer quantity) {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setName(NAME);
+        dto.setPrice(25F);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+        dto.setQuantity(quantity);
+
+        final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.createProduct(dto));
+
+        assertEquals("Invalid quantity value: the quantity must be greater or equal to zero", badRequestException.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(floats = { 0F, Float.MIN_VALUE, 5F - Float.MIN_VALUE, 5F })
+    public void createProduct_validRating(final Float rating) {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setName(NAME);
+        dto.setPrice(25F);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+        dto.setRating(rating);
+
+        when(productRepository.existsByCode(anyString())).thenReturn(false);
+        when(productMapper.map(any(ProductPatchDTO.class))).thenReturn(new Product());
+        when(productRepository.save(any(Product.class))).thenReturn(new Product());
+        when(productMapper.map(any(Product.class))).thenReturn(new ProductDTO());
+
+        productService.createProduct(dto);
+
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(floats = { Float.NEGATIVE_INFINITY, -Float.MAX_VALUE, -Float.MIN_VALUE, 5.00001F, Float.MAX_VALUE, Float.POSITIVE_INFINITY })
+    public void createProduct_invalidRating(final Float rating) {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setName(NAME);
+        dto.setPrice(25F);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+        dto.setRating(rating);
+
+        final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.createProduct(dto));
+
+        assertEquals("Invalid rating value: the rating must be between 0 and 5, included", badRequestException.getMessage());
+    }
+
+    @Test
+    public void createProduct_severalConstraintViolations() {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setCode(CODE);
+        dto.setName(NAME);
+        dto.setCategory(ProductCategory.ELECTRONICS);
+
+        dto.setPrice(-1F);
+        dto.setQuantity(-1);
+        dto.setRating(-1F);
+
+        final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.createProduct(dto));
+
+        assertTrue(badRequestException.getMessage().contains("Invalid price value: the price must be greater or equal to zero"));
+        assertTrue(badRequestException.getMessage().contains("Invalid quantity value: the quantity must be greater or equal to zero"));
+        assertTrue(badRequestException.getMessage().contains("Invalid rating value: the rating must be between 0 and 5, included"));
     }
 
     // *** updateProduct ***

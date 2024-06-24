@@ -1,5 +1,9 @@
 package org.fgreau.altenshop.service;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.fgreau.altenshop.dto.ProductDTO;
 import org.fgreau.altenshop.dto.ProductPatchDTO;
 import org.fgreau.altenshop.exception.BadRequestException;
@@ -154,6 +158,12 @@ public class ProductService {
             throw new BadRequestException("New product is missing mandatory field(s) : [" + String.join(",", missingFields) + "]");
         }
 
+        List<String> numberConstraintViolations = checkNumberConstraintViolations(newProduct);
+
+        if (!numberConstraintViolations.isEmpty()) {
+            throw new BadRequestException(String.join("\n", numberConstraintViolations));
+        }
+
         if (productRepository.existsByCode(newProduct.getCode())) {
             throw new BadRequestException("Product with code " + newProduct.getCode() + " already exists");
         }
@@ -190,6 +200,23 @@ public class ProductService {
         }
 
         return missingfields;
+    }
+
+    /**
+     * Checks if any number value violates constraints.
+     *
+     * @param product new product fields
+     * @return list of numeric constraint violations
+     */
+    public List<String> checkNumberConstraintViolations(final ProductPatchDTO product) {
+        final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+        final Validator validator = validatorFactory.getValidator();
+        validatorFactory.close();
+
+        return validator.validate(product)
+            .stream()
+            .map(ConstraintViolation::getMessage)
+            .toList();
     }
 
     /**

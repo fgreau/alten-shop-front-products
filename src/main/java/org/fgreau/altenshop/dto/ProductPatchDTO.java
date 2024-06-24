@@ -1,5 +1,7 @@
 package org.fgreau.altenshop.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.Data;
 import org.fgreau.altenshop.enums.ProductCategory;
 
@@ -27,11 +29,13 @@ public class ProductPatchDTO {
     /**
      * Price, in USD.
      */
+    @Min(value = 0, message = "Invalid price value: the price must be greater or equal to zero")
     private Float price;
 
     /**
      * Available quantity in inventory.
      */
+    @Min(value = 0, message = "Invalid quantity value: the quantity must be greater or equal to zero")
     private Integer quantity;
 
     /**
@@ -47,5 +51,7 @@ public class ProductPatchDTO {
     /**
      * Rating of the product, between 0 and 5 included.
      */
+    @Min(value = 0, message = "Invalid rating value: the rating must be between 0 and 5, included")
+    @Max(value = 5, message = "Invalid rating value: the rating must be between 0 and 5, included")
     private Float rating;
 }
