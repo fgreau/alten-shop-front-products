@@ -50,7 +50,7 @@ public class ProductController {
      * @return products
      */
     @GetMapping
-    @Operation(summary = "Returns a pageable list of products")
+    @Operation(summary = "Get a pageable list of products")
     public PagedModel<EntityModel<ProductDTO>> getAllProductsPageable(
         @Parameter(description = "Filter products by code (contains)") @RequestParam(value = "code", required = false) String codeFilter,
         @Parameter(description = "Filter products by name (contains)") @RequestParam(value = "name", required = false) String nameFilter,
@@ -67,7 +67,7 @@ public class ProductController {
      * @return DTO
      */
     @GetMapping(value = "/{productId}")
-    @Operation(summary = "Returns the details of a product")
+    @Operation(summary = "Get the details of a product")
     public ProductDTO getProductDetails(@PathVariable("productId") Long id) {
         return this.productService.getProductDetails(id);
     }
@@ -79,7 +79,7 @@ public class ProductController {
      * @return created DTO
      */
     @PostMapping
-    @Operation(summary = "Creates a product")
+    @Operation(summary = "Create a product")
     public ProductDTO createProduct(@RequestBody ProductPatchDTO newProduct) {
         return productService.createProduct(newProduct);
     }
@@ -92,6 +92,7 @@ public class ProductController {
      * @return updated product
      */
     @PatchMapping(value = "/{productId}")
+    @Operation(summary = "Update a product")
     public ProductDTO updateProduct(@PathVariable("productId") Long id, @RequestBody ProductPatchDTO updatedProduct) {
         return productService.updateProduct(id, updatedProduct);
     }
@@ -103,6 +104,7 @@ public class ProductController {
      * @return status
      */
     @DeleteMapping(value = "/{productId}")
+    @Operation(summary = "Delete a product")
     public ResponseEntity<Void> deleteProduct(@PathVariable("productId") Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();

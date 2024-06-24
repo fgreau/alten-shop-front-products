@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Product } from "../product.model";
-import mockedProducts from '../../../assets/products.json'
 import { SnackbarService } from "../../shared/utils/snackbar/snackbar.service";
 import { CrudItemOptions } from "../../shared/utils/crud-item-options/crud-item-options.model";
 import { ControlType } from "../../shared/utils/crud-item-options/control-type.model";
@@ -9,6 +8,7 @@ import { ProductService } from "../product.service";
 import { DEFAULT_SEARCH_PARAMS, SearchParams } from "../../shared/ui/list/search.model";
 import { LazyLoadEvent } from "primeng/api";
 import { SearchService } from "../../shared/ui/list/search.service";
+import { catchError, forkJoin, map, Observable, of } from "rxjs";
 
 const DEFAULT_PRODUCT_SEARCH_PARAMS: SearchParams = { ...DEFAULT_SEARCH_PARAMS, sortField: 'id' }
 
@@ -22,6 +22,7 @@ export class ProductsAdminComponent implements OnInit {
   products: Product[] = []
   totalProducts: number = 0
   config: CrudItemOptions[]
+  currentSearchParams: SearchParams = DEFAULT_PRODUCT_SEARCH_PARAMS
 
   constructor(private snackbarService: SnackbarService, private productService: ProductService, private searchService: SearchService) {
     this.config = [
@@ -89,65 +90,69 @@ export class ProductsAdminComponent implements OnInit {
   getData(): void {
     this.productService.getAll(DEFAULT_PRODUCT_SEARCH_PARAMS)
       .subscribe(response => {
-        console.log('response : ', response)
         this.products = response._embedded.productDTOList
         this.totalProducts = response.page.totalElements
       })
-
-    // fill the products array with elements from the json file
-    this.products = mockedProducts.data
   }
 
   updateProductList(event: LazyLoadEvent): void {
-    console.log('event : ', event)
-    console.log('searchParams : ', this.searchService.mapToSearchParams(event, 'id'))
-    this.productService.getAll(this.searchService.mapToSearchParams(event, 'id'))
+    let searchParams = this.searchService.mapToSearchParams(event, 'id')
+    this.currentSearchParams = searchParams
+    this.updateProductListWithSearchParams(searchParams)
+  }
+
+  updateProductListWithSearchParams(event: SearchParams): void {
+    this.productService.getAll(event)
       .subscribe(response => {
-        console.log('response : ', response)
         this.products = response._embedded ? response._embedded.productDTOList : []
         this.totalProducts = response.page.totalElements
       })
   }
 
-  deleteProduct(id: number): void {
-    //TODO switch to the DELETE method when the backend is done
-
+  deleteProduct(id: number): Observable<boolean> {
+    return this.productService.delete(id)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      )
   }
 
   deleteProducts(ids: number[]): void {
-    //TODO switch to the DELETE method when the backend is done
+    const requests: Observable<[number, boolean]>[] = ids.map(id =>
+      this.deleteProduct(id).pipe(
+        map(result => [id, result] as [number, boolean])
+      )
+    );
 
-    this.localDeleteProducts(ids)
+    forkJoin(requests).subscribe(
+      ((results: [number, boolean][]) => {
+        const idsDeleted: number[] = []
+        const idsNotDeleted: number[] = []
+
+        results.forEach(([id, deleted]) => {
+          if (deleted) {
+            idsDeleted.push(id)
+          } else {
+            idsNotDeleted.push(id)
+          }
+        })
+
+        this.displayDeleteResults(idsDeleted, idsNotDeleted)
+        this.updateProductListWithSearchParams(this.currentSearchParams)
+      })
+    )
   }
 
-  localDeleteProducts(ids: number[]): void {
-    if (ids.length > 0) {
-
-      let deleted: Product[] = []
-      let failed: number = 0
-
-      let index: number
-      for (const id of ids) {
-        index = this.products.findIndex(item => item.id === id)
-        if (index > -1) {
-          deleted.push(...this.products.splice(index, 1))
-        } else {
-          failed++
-        }
+  displayDeleteResults(idsDeleted: number[], idsNotDeleted: number[]): void {
+    if (idsNotDeleted.length === 0) {
+      this.snackbarService.displaySuccess(`Product(s) [${ idsDeleted.join(', ') }] deleted successfully`)
+    } else {
+      if (idsDeleted.length !== 0) {
+        this.snackbarService.displayInfo(`Product(s) [${ idsDeleted.join(', ') }] deleted successfully`)
       }
-
-      if (deleted.length > 0 || failed > 0) {
-        if (deleted.length > 0 && failed == 0) {
-          this.snackbarService.displaySuccess(`${ deleted.length > 1 ? 'Products' : 'Product' } [${ deleted.map(product => product.code).join(', ') }] ${ deleted.length > 1 ? 'have' : 'has' } been deleted.`)
-        } else if (deleted.length > 0 && failed > 0) {
-          this.snackbarService.displayInfo(`${ deleted.length > 1 ? 'Products' : 'Product' } [${ deleted.map(product => product.code).join(', ') }] ${ deleted.length > 1 ? 'have' : 'has' } been deleted, 
-          but it failed for the other ${ failed > 1 ? 'products' : 'product' }.`)
-        } else {
-          this.snackbarService.displayError(`${ failed > 1 ? 'Products' : 'Product' } could not be deleted.`)
-        }
-      }
-
+      this.snackbarService.displayError(`Product(s) [${ idsNotDeleted.join(', ') }] could not be deleted`)
     }
   }
+
   protected readonly Product = Product;
 }

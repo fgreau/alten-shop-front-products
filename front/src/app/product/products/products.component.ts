@@ -40,7 +40,6 @@ export class ProductsComponent implements OnInit {
   getData(): void {
     this.productService.getAll(DEFAULT_PRODUCT_SEARCH_PARAMS)
       .subscribe(response => {
-        console.log('response : ', response)
         this.products = response._embedded.productDTOList
         this.totalProducts = response.page.totalElements
       })
@@ -50,7 +49,6 @@ export class ProductsComponent implements OnInit {
   updateProductList(event: PaginationEvent): void {
     this.productService.getAll(this.searchService.formatSearchFilter({ ...DEFAULT_PRODUCT_SEARCH_PARAMS, ...event }))
       .subscribe(response => {
-        console.log('response : ', response)
         this.products = response._embedded.productDTOList
         this.totalProducts = response.page.totalElements
       })

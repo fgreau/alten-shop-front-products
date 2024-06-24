@@ -32,4 +32,9 @@ export class RestApiService<T> {
     return this.http.get<PageableResponse<T>>(this.apiUrl, { params })
   }
 
+  delete(id: number): Observable<void> {
+    let url = `${ this.apiUrl }/${id}`
+    return this.http.delete<void>(url)
+  }
+
 }
