@@ -227,8 +227,24 @@ public class ProductService {
      * @return updated product
      */
     public ProductDTO updateProduct(final Long id, final ProductPatchDTO updatedProduct) {
-        // TODO
-        return null;
+        final Product product = productRepository.findByIdAndDeletedFalse(id)
+            .orElseThrow(() -> new NotFoundException("Product " + id + " not found"));
+
+        if (updatedProduct.getCode() != null && !updatedProduct.getCode().equals(product.getCode())) {
+            if (productRepository.existsByCode(updatedProduct.getCode()))
+                throw new BadRequestException("Can't update code: it already belongs to another product");
+        }
+
+        final List<String> numberConstraintViolations = checkNumberConstraintViolations(updatedProduct);
+
+        if (!numberConstraintViolations.isEmpty()) {
+            throw new BadRequestException(String.join("\n", numberConstraintViolations));
+        }
+
+        productMapper.patchValues(product, updatedProduct);
+        final Product savedProduct = productRepository.save(product);
+
+        return productMapper.map(savedProduct);
     }
 
     /**

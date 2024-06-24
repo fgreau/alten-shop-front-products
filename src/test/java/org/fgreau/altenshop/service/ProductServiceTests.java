@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -467,6 +468,58 @@ public class ProductServiceTests {
     }
 
     // *** updateProduct ***
+
+    @Test
+    public void updateProduct_ok() {
+        when(productRepository.findByIdAndDeletedFalse(anyLong())).thenReturn(Optional.of(new Product()));
+        doNothing().when(productMapper).patchValues(any(Product.class), any(ProductPatchDTO.class));
+        when(productRepository.save(any(Product.class))).thenReturn(new Product());
+        when(productMapper.map(any(Product.class))).thenReturn(new ProductDTO());
+
+        final ProductDTO productDTO = productService.updateProduct(ID, new ProductPatchDTO());
+
+        verify(productRepository).save(any(Product.class));
+        assertNotNull(productDTO);
+    }
+
+    @Test
+    public void updateProduct_productNotFound() {
+        when(productRepository.findByIdAndDeletedFalse(anyLong())).thenReturn(Optional.empty());
+
+        final NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> productService.updateProduct(ID, new ProductPatchDTO()));
+
+        assertEquals("Product " + ID + " not found", notFoundException.getMessage());
+    }
+
+    @Test
+    public void updateProduct_duplicateCode() {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+        dto.setCode(CODE);
+
+        when(productRepository.findByIdAndDeletedFalse(anyLong())).thenReturn(Optional.of(new Product()));
+        when(productRepository.existsByCode(anyString())).thenReturn(true);
+
+        final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.updateProduct(ID, dto));
+
+        assertEquals("Can't update code: it already belongs to another product", badRequestException.getMessage());
+    }
+
+    @Test
+    public void updateProduct_constraintViolations() {
+        final ProductPatchDTO dto = new ProductPatchDTO();
+
+        dto.setPrice(-1F);
+        dto.setQuantity(-1);
+
+        dto.setRating(-1F);
+        when(productRepository.findByIdAndDeletedFalse(anyLong())).thenReturn(Optional.of(new Product()));
+
+        final BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> productService.updateProduct(ID, dto));
+
+        assertTrue(badRequestException.getMessage().contains("Invalid price value: the price must be greater or equal to zero"));
+        assertTrue(badRequestException.getMessage().contains("Invalid quantity value: the quantity must be greater or equal to zero"));
+        assertTrue(badRequestException.getMessage().contains("Invalid rating value: the rating must be between 0 and 5, included"));
+    }
 
     // *** deleteProduct ***
 
