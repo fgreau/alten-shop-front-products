@@ -23,13 +23,11 @@ or use the embedded Swagger UI : [localhost:8080/swagger-ui/index.html](http://l
 
 ## What's left to do
 
-Until this project can be considered done, it is still missing a few steps : 
-- [ ] Unit tests for service methods
-  - [x] POST
-  - [ ] PATCH
+Until this project can be considered done, it is still missing a few steps :
+-  [ ] Plug the front-end to the endpoints
   - [x] DELETE
-- [ ] Writing the associated service methods
--  [ ] Plug the front-end to these methods
+  - [ ] POST
+  - [ ] PATCH
 -  [ ] Complete this documentation
 
 
