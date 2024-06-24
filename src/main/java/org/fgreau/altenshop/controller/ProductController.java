@@ -91,7 +91,6 @@ public class ProductController {
      * @param updatedProduct new product values
      * @return updated product
      */
-    // TODO check if the same DTO fits the situation or if I need to create another simple patchDTO
     @PatchMapping(value = "/{productId}")
     public ProductDTO updateProduct(@PathVariable("productId") Long id, @RequestBody ProductPatchDTO updatedProduct) {
         return productService.updateProduct(id, updatedProduct);
