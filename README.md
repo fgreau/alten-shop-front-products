@@ -23,10 +23,15 @@ or use the embedded Swagger UI : [localhost:8080/swagger-ui/index.html](http://l
 
 ## What's left to do
 
-This project is currently done as much as I wanted it to be for this scope.  
-It doesn't mean it can't be improved. 
+This project is currently done as much as I wanted it to be for this scope. It doesn't mean it can't be improved. 
+
+
 Right now, it lacks some testing, especially for the front-end, as well as continuous integration for the github repository.  
+
+
 As I don't have a lot of experience in those, it will require some learning on my side. I may do it, but it will be outside of this exercise's scope.  
+
+
 I may as well implement the i18n / l10n translations that I decided to leave to the side during this exercise. For the time being, I truly hope you speak english ;)
 
 ___
