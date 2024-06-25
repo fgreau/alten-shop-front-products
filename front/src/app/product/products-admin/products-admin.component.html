@@ -8,5 +8,7 @@
 					 [entity]="Product"
 					 [lazy]="true"
 					 (deleted)="deleteProducts($event)"
+					 (createProductSaved)="createProduct($event)"
+					 (editProductSaved)="updateProduct($event)"
 					 (lazyLoaded)="updateProductList($event)"
 ></app-table>

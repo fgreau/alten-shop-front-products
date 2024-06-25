@@ -8,7 +8,7 @@ import { PageableResponse } from "./pageable-response.model";
   providedIn: 'root'
 })
 export class RestApiService<T> {
-  private readonly apiUrl: string
+  protected readonly apiUrl: string
 
   constructor(protected http: HttpClient, apiUrl: string) {
     this.apiUrl = apiUrl
@@ -30,6 +30,11 @@ export class RestApiService<T> {
     }
 
     return this.http.get<PageableResponse<T>>(this.apiUrl, { params })
+  }
+
+  get(id: number): Observable<T> {
+    let url = `${this.apiUrl}/${id}`
+    return this.http.get<T>(url)
   }
 
   delete(id: number): Observable<void> {

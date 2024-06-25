@@ -8,7 +8,8 @@ import { ProductService } from "../product.service";
 import { DEFAULT_SEARCH_PARAMS, SearchParams } from "../../shared/ui/list/search.model";
 import { LazyLoadEvent } from "primeng/api";
 import { SearchService } from "../../shared/ui/list/search.service";
-import { catchError, forkJoin, map, Observable, of } from "rxjs";
+import { catchError, forkJoin, map, Observable, of, tap, throwError } from "rxjs";
+import { PatchProduct } from "../patch-product.model";
 
 const DEFAULT_PRODUCT_SEARCH_PARAMS: SearchParams = { ...DEFAULT_SEARCH_PARAMS, sortField: 'id' }
 
@@ -32,10 +33,10 @@ export class ProductsAdminComponent implements OnInit {
         controlType: ControlType.SELECT,
         options: [
           { value: 'placeholder', label: '- select one -', disabled: true },
-          { value: 'Accessories', label: 'Accessories' },
-          { value: 'Clothing', label: 'Clothing' },
-          { value: 'Fitness', label: 'Fitness' },
-          { value: 'Electronics', label: 'Electronics' },
+          { value: 'ACCESSORIES', label: 'Accessories' },
+          { value: 'CLOTHING', label: 'Clothing' },
+          { value: 'FITNESS', label: 'Fitness' },
+          { value: 'ELECTRONICS', label: 'Electronics' },
         ],
         columnOptions: { hidden: true },
         controlOptions: { validators: [Validators.required] },
@@ -151,6 +152,115 @@ export class ProductsAdminComponent implements OnInit {
         this.snackbarService.displayInfo(`Product(s) [${ idsDeleted.join(', ') }] deleted successfully`)
       }
       this.snackbarService.displayError(`Product(s) [${ idsNotDeleted.join(', ') }] could not be deleted`)
+    }
+  }
+
+  createProduct(product: Product) {
+    const patchProduct = this.productService.productToPatchProduct(product);
+
+    this.productService.create(patchProduct).pipe(
+
+      tap(() => {
+        this.snackbarService.displaySuccess('Product created successfully')
+
+        let searchParams: SearchParams = { ...DEFAULT_PRODUCT_SEARCH_PARAMS, sortField: 'id', sortOrder: 'desc' }
+        this.currentSearchParams = searchParams
+        this.updateProductListWithSearchParams(searchParams)
+      }),
+
+      catchError(error => {
+        this.snackbarService.displayError('Product creation failed')
+        return throwError(error)
+      })
+    ).subscribe()
+  }
+
+  updateProduct(product: Product) {
+
+    const originalProduct = this.products.find(value => value.code === product.code);
+
+    if (originalProduct === undefined) {
+      this.snackbarService.displayError(`Couldn't find product with code [${ product.code }]`)
+      return
+    }
+
+    const patchedValues = this.getPatchedValues(originalProduct, product)
+
+    if (patchedValues === undefined) {
+      this.snackbarService.displayInfo('New product is identical to original, update cancelled')
+    }
+
+    this.productService.update(originalProduct.id, patchedValues)
+      .pipe(
+
+       tap(updatedProduct => {
+         this.snackbarService.displaySuccess(`Product was updated successfully`)
+
+         // Update the product in products list. If not found, update the list.
+         let index = this.products.findIndex(value => value.id === updatedProduct.id)
+         if (index !== -1) {
+           this.products[index] = updatedProduct
+         } else {
+           this.updateProductListWithSearchParams(this.currentSearchParams)
+         }
+       }),
+
+        catchError(error => {
+          this.snackbarService.displayError(`The product couldn't be updated`)
+          return throwError(error)
+        })
+
+      ).subscribe()
+  }
+
+  getPatchedValues(originalProduct: Product, editedProduct: Product) {
+    let patchedValues = new PatchProduct();
+    let modified = false;
+
+    if (editedProduct.code !== originalProduct.code) {
+      patchedValues.code = editedProduct.code
+      modified = true
+    }
+
+    if (editedProduct.name !== originalProduct.name) {
+      patchedValues.name = editedProduct.name
+      modified = true
+    }
+
+    if (editedProduct.description !== originalProduct.description) {
+      patchedValues.description = editedProduct.description
+      modified = true
+    }
+
+    if (editedProduct.price !== originalProduct.price) {
+      patchedValues.price = editedProduct.price
+      modified = true
+    }
+
+    if (editedProduct.quantity !== originalProduct.quantity) {
+      patchedValues.quantity = editedProduct.quantity
+      modified = true
+    }
+
+    if (editedProduct.category !== originalProduct.category) {
+      patchedValues.category = editedProduct.category
+      modified = true
+    }
+
+    if (editedProduct.image !== originalProduct.image) {
+      patchedValues.image = editedProduct.image
+      modified = true
+    }
+
+    if (editedProduct.rating !== originalProduct.rating) {
+      patchedValues.rating = editedProduct.rating
+      modified = true
+    }
+
+    if (modified) {
+      return patchedValues
+    } else {
+      return undefined
     }
   }
 

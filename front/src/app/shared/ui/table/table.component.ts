@@ -27,7 +27,8 @@ export class TableComponent<T> implements OnChanges {
   @Input() public readonly lazy: boolean = false;
   @Input() public readonly totalRecords: number;
   @Input() public readonly multiSelect: boolean;
-  @Output() saved: EventEmitter<T> = new EventEmitter();
+  @Output() createProductSaved: EventEmitter<T> = new EventEmitter();
+  @Output() editProductSaved: EventEmitter<T> = new EventEmitter();
   @Output() deleted: EventEmitter<number[]> = new EventEmitter();
   @Output() lazyLoaded: EventEmitter<TableLazyLoadEvent> = new EventEmitter();
 
@@ -96,8 +97,12 @@ export class TableComponent<T> implements OnChanges {
     this.editedEntry = new this.entity();
   }
 
-  public onEditedEntrySave(editedEntry): void {
-    this.saved.emit(editedEntry);
+  public onEditedEntrySave(editedEntry, ): void {
+    if (this.creation) {
+      this.createProductSaved.emit(editedEntry);
+    } else {
+      this.editProductSaved.emit(editedEntry);
+    }
     this.editedEntry = null;
     this.entryEditionDialogDisplayed = false;
   }
